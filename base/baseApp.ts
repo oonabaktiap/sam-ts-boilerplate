@@ -2,8 +2,12 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Base } from '../base/src/entity/base.entity';
-import { findBaseById, deleteBaseById, insertBase, updateBaseById } from 'src/service/base.service';
+import { findBaseById, findCachedBaseById, insertBase, setCachedBaseById, deleteBaseById,  updateBaseById } from 'src/service/base.service';
 import { BaseResponse } from 'src/dto/oona.base.response.dto';
+import { set } from 'src/util/redis.util';
+// import { redisClient } from 'src/config/redis.config';
+// import { MyDataSource } from 'src/config/data-source.config';
+// import dotenv from 'dotenv';
 
 /**
  *
@@ -15,17 +19,125 @@ import { BaseResponse } from 'src/dto/oona.base.response.dto';
  *
  */
 
-
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const createBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         // console.log('incoming event : ',JSON.stringify(event));
+            console.log('into insertBaseFunc')
+            return await insertBaseFunc(event);
+        // return {
+        //     statusCode: 404,
+        //     body: JSON.stringify({
+        //         message: 'not found',
+        //     }),
+        // };
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+
+export const getBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into findBaseByIdFunc')
+        return await findBaseByIdFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+export const updateBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into updateBaseByIdFunc')
+        return await updateBaseByIdFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+export const deleteBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into deleteBaseByIdFunc')
+        return await deleteBaseByIdFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+
+export const findCachedBaseByIdBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into findCachedBaseByIdFunc')
+        return await findCachedBaseByIdFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+
+
+
+export const setCachedBaseByIdBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into insertBaseFunc')
+        return await setCachedBaseByIdFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+
+export const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        // dotenv.config();
+        // if (!MyDataSource.isInitialized) await MyDataSource.initialize();
+        // if (!redisClient.isOpen) await redisClient.connect();
+
+        // console.log('incoming event : ',JSON.stringify(event));
+        if (event.resource === '/base/{id}' && event.httpMethod === 'GET' ) { //Read
+            console.log('into findBaseByIdFunc')
+            return await findBaseByIdFunc(event);
+        }
+        if (event.resource === '/base/cached/{id}' && event.httpMethod === 'GET' ) { //Read
+            console.log('into findBaseByIdFunc')
+            return await findCachedBaseByIdFunc(event);
+        }
         if (event.resource === '/base/create') { //Create
             console.log('into insertBaseFunc')
             return await insertBaseFunc(event);
         }
-        if (event.resource === '/base/{id}' && event.httpMethod === 'GET' ) { //Read
-            console.log('into findBaseByIdFunc')
-            return await findBaseByIdFunc(event);
+        if (event.resource === '/base/cached/set/{id}') { //Create
+            console.log('into insertBaseFunc')
+            return await setCachedBaseByIdFunc(event);
         }
         if (event.resource === '/base/{id}' && event.httpMethod === 'PUT') {//Update
             console.log('into updateBaseByIdFunc')
@@ -51,6 +163,64 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         };
     }
 };
+
+async function findCachedBaseByIdFunc(event : APIGatewayProxyEvent) {
+    if (event && event.pathParameters && event.pathParameters.id) {
+        const id: number = +event.pathParameters.id;
+        console.log("event path parameters : ", event.pathParameters)
+        console.log("event pathParameter id : ",id)
+        const base = await findCachedBaseById(id);
+        if(base){
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    base,
+                }),
+            };
+        }
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Base with ID not found',
+            }),
+        };
+    }
+    return {
+        statusCode: 400,
+        body: JSON.stringify({
+            message: 'id cannot be empty',
+        }),
+    };
+}
+
+async function setCachedBaseByIdFunc(event : APIGatewayProxyEvent) {
+    if (event && event.pathParameters && event.pathParameters.id) {
+        const id: number = +event.pathParameters.id;
+        console.log("event path parameters : ", event.pathParameters)
+        console.log("event pathParameter id : ",id)
+        const base = await setCachedBaseById(id);
+        if(base){
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    base,
+                }),
+            };
+        }
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Base with ID not found',
+            }),
+        };
+    }
+    return {
+        statusCode: 400,
+        body: JSON.stringify({
+            message: 'id cannot be empty',
+        }),
+    };
+}
 
 async function insertBaseFunc(event: APIGatewayProxyEvent) {
     if (event.body) {
@@ -82,6 +252,7 @@ async function insertBaseFunc(event: APIGatewayProxyEvent) {
         }),
     };
 }
+
 async function findBaseByIdFunc(event : APIGatewayProxyEvent) {
     if (event && event.pathParameters && event.pathParameters.id) {
         const id: number = +event.pathParameters.id;

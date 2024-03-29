@@ -3,11 +3,14 @@ import {
   insertBase,
   deleteBaseById,
   updateBaseById,
+  findCachedBaseById,
+  setCachedBaseById
 } from './base.service';
-import { MyDataSource } from '../config/data-source';
+import { MyDataSource } from '../config/data-source.config';
 import { Base } from '../entity/base.entity';
+import { redisClient } from '../config/redis.config';
 
-jest.mock('../config/data-source', () => ({
+jest.mock('../config/data-source.config', () => ({
   MyDataSource: {
     isInitialized: false,
     initialize: jest.fn(),
@@ -18,13 +21,66 @@ jest.mock('../config/data-source', () => ({
       update: jest.fn(),
     }),
     createQueryBuilder: jest.fn().mockReturnValue({
-      delete: jest.fn().mockReturnThis(), // Mock the delete method of query builder
-      from: jest.fn().mockReturnThis(), // Mock the from method of query builder
-      where: jest.fn().mockReturnThis(), // Mock the where method of query builder
-      execute: jest.fn().mockResolvedValue({}), // Mock execute method to return expected result
+      delete: jest.fn().mockReturnThis(), 
+      from: jest.fn().mockReturnThis(), 
+      where: jest.fn().mockReturnThis(), 
+      execute: jest.fn().mockResolvedValue({}), 
     }),
+    
   },
 }));
+
+jest.mock('../config/redis.config', () => ({
+  redisClient: {
+      isOpen: true,
+      isReady: true,
+      connect: jest.fn(),
+      get: jest.fn(),
+      set: jest.fn(),
+  },
+}));
+
+describe('Cache Functions', () => {
+  jest.mock('./base.service', () => ({
+    findBaseById: jest.fn(),
+  }));
+  
+  beforeEach(() => {
+      jest.clearAllMocks();
+  });
+
+  it('findCachedBaseById - cache hit', async () => {
+      (redisClient.get as jest.Mock).mockResolvedValueOnce(JSON.stringify({ id: 1, name: 'Sample Base' }));
+
+      const result = await findCachedBaseById(1);
+
+      expect(result).toEqual({ id: 1, name: 'Sample Base' });
+      expect(redisClient.get).toHaveBeenCalledWith('base:1');
+  });
+
+  it('findCachedBaseById - cache miss', async () => {
+    (redisClient.get as jest.Mock).mockResolvedValueOnce(null);
+
+    const result = await findCachedBaseById(1);
+
+    expect(result).toBeNull();
+    expect(redisClient.get).toHaveBeenCalledWith('base:1');
+  });
+
+  it('setCachedBaseById', async () => {
+    const mockBase = { id: 1, varString: 'mock', varNumber: 123 };
+    (MyDataSource.getRepository(Base) as any).findOneBy.mockResolvedValue(
+      mockBase,
+    );
+    await setCachedBaseById(1);
+    
+    expect(MyDataSource.initialize).toHaveBeenCalled();
+    expect(
+      (MyDataSource.getRepository(Base) as any).findOneBy,
+    ).toHaveBeenCalledWith({ id: 1 });
+    expect(redisClient.set).toHaveBeenCalledWith('base:1', JSON.stringify({ id: 1, varString: 'mock', varNumber: 123 }));
+  });
+});
 
 describe('findBaseById', () => {
   it('should find base by id', async () => {
