@@ -1,9 +1,10 @@
 import { DataSource } from 'typeorm';
 import { Base } from '../entity/base.entity';
-// import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 
 
 // dotenv.config();
+// console.log('database host : ' + process.env.DATABASE_HOST)
 
 //docker run --name postgres-container -p 5432:2345 -e POSTGRES_PASSWORD=password123 -e POSTGRES_USER=admin -d postgres
 export const MyDataSource = new DataSource({
@@ -13,16 +14,16 @@ export const MyDataSource = new DataSource({
   username: 'postgres',
   password: 'password',
   database: 'postgres',
-  
+
 
   // type: 'postgres',
   // host: process.env.DATABASE_HOST,
-  // port: parseInt(process.env.DATABASE_PORT,10),
+  // port: parseInt(process.env.DATABASE_PORT, 10),
   // username: process.env.DATABASE_USERNAME,
   // password: process.env.DATABASE_PASSWORD,
   // database: process.env.DATABASE_SCHEMA,
-  
-  
+
+
   synchronize: true,
   logging: false,
   entities: [Base],
