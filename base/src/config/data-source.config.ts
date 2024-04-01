@@ -11,7 +11,7 @@ export const MyDataSource = new DataSource({
   host: 'host.docker.internal',
   port: 5432,
   username: 'postgres',
-  password: 'postgres',
+  password: 'password',
   database: 'postgres',
   
 
