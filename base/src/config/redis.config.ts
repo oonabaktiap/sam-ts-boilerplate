@@ -23,16 +23,16 @@ export const redisClient = createClient(
   // }
 );
 
-redisClient.connect().then(() => {
-  // console.log('redis details')
-  // console.log(process.env.REDIS_HOST);
-  // console.log(process.env.REDIS_PORT);
-  // console.log(process.env.REDIS_PASSWORD);
-  console.log('Redis connection established ');
-})
-  .catch((err) => {
-    console.error('Error during Redis connection: with details ', err);
-    // console.log(process.env.REDIS_HOST);
-    // console.log(process.env.REDIS_PORT);
-    // console.log(process.env.REDIS_PASSWORD);
-  });
+// redisClient.connect().then(() => {
+//   // console.log('redis details')
+//   // console.log(process.env.REDIS_HOST);
+//   // console.log(process.env.REDIS_PORT);
+//   // console.log(process.env.REDIS_PASSWORD);
+//   console.log('Redis connection established ');
+// })
+//   .catch((err) => {
+//     console.error('Error during Redis connection: with details ', err);
+//     // console.log(process.env.REDIS_HOST);
+//     // console.log(process.env.REDIS_PORT);
+//     // console.log(process.env.REDIS_PASSWORD);
+//   });

@@ -2,9 +2,8 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Base } from '../base/src/entity/base.entity';
-import { findBaseById, findCachedBaseById, insertBase, setCachedBaseById, deleteBaseById, updateBaseById } from 'src/service/base.service';
+import { findBaseById, findCachedBaseById, insertBase, setCachedBaseById, deleteBaseById, updateBaseById, getBaseNoDb } from 'src/service/base.service';
 import { BaseResponse } from 'src/dto/oona.base.response.dto';
-import { set } from 'src/util/redis.util';
 // import { redisClient } from 'src/config/redis.config';
 // import { MyDataSource } from 'src/config/data-source.config';
 // import dotenv from 'dotenv';
@@ -20,6 +19,21 @@ import { set } from 'src/util/redis.util';
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
+export const getBaseNoDbHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into getBaseNoDB')
+        return await getBaseNoDbFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
+
 
 export const createBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
@@ -102,7 +116,6 @@ export const findCachedBaseByIdBaseHandler = async (event: APIGatewayProxyEvent)
 }
 
 
-
 export const setCachedBaseByIdBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         console.log('into setCachedBaseByIdFunc')
@@ -133,11 +146,11 @@ export const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatew
             console.log('into findBaseByIdFunc')
             return await findCachedBaseByIdFunc(event);
         }
-        if (event.resource === '/base/create') { //Create
+        if (event.resource === '/base/create' && event.httpMethod === 'POST') { //Create
             console.log('into insertBaseFunc')
             return await insertBaseFunc(event);
         }
-        if (event.resource === '/base/cached/set/{id}') { //Create
+        if (event.resource === '/base/cached/set/{id}' && event.httpMethod === 'GET') {
             console.log('into insertBaseFunc')
             return await setCachedBaseByIdFunc(event);
         }
@@ -148,6 +161,10 @@ export const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatew
         if (event.resource === '/base/{id}' && event.httpMethod === 'DELETE') { //Delete
             console.log('into deleteBaseByIdFunc')
             return await deleteBaseByIdFunc(event);
+        }
+        if (event.resource === '/base/nodb' && event.httpMethod === 'GET') {
+            console.log('into deleteBaseByIdFunc')
+            return await getBaseNoDbFunc(event);
         }
         return {
             statusCode: 404,
@@ -331,6 +348,22 @@ async function deleteBaseByIdFunc(event: APIGatewayProxyEvent) {
                 body: deleteResult,
             };
         }
+    }
+    return {
+        statusCode: 400,
+        body: JSON.stringify({
+            message: 'id cannot be empty',
+        }),
+    };
+}
+
+async function getBaseNoDbFunc(event: APIGatewayProxyEvent) {
+    const noDbResult = await getBaseNoDb();
+    if (noDbResult) {
+        return {
+            statusCode: 200,
+            body: noDbResult,
+        };
     }
     return {
         statusCode: 400,

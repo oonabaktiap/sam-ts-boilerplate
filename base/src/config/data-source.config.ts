@@ -33,20 +33,20 @@ export const MyDataSource = new DataSource({
   // migrations: ['../migration/*.ts'],
 });
 
-MyDataSource.initialize()
-  .then(() => {
-    // console.log(process.env.DATABASE_HOST);
-    // console.log(process.env.DATABASE_PORT);
-    // console.log(process.env.DATABASE_USERNAME);
-    // console.log(process.env.DATABASE_PASSWORD);
-    // console.log(process.env.DATABASE_SCHEMA);
-    console.log('Data Source has been initialized!');
-  })
-  .catch((err) => {
-    console.error('Error during Data Source initialization:', err);
-    // console.log(process.env.DATABASE_HOST);
-    // console.log(process.env.DATABASE_PORT);
-    // console.log(process.env.DATABASE_USERNAME);
-    // console.log(process.env.DATABASE_PASSWORD);
-    // console.log(process.env.DATABASE_SCHEMA);
-  });
+// MyDataSource.initialize()
+//   .then(() => {
+//     // console.log(process.env.DATABASE_HOST);
+//     // console.log(process.env.DATABASE_PORT);
+//     // console.log(process.env.DATABASE_USERNAME);
+//     // console.log(process.env.DATABASE_PASSWORD);
+//     // console.log(process.env.DATABASE_SCHEMA);
+//     console.log('Data Source has been initialized!');
+//   })
+//   .catch((err) => {
+//     console.error('Error during Data Source initialization:', err);
+//     // console.log(process.env.DATABASE_HOST);
+//     // console.log(process.env.DATABASE_PORT);
+//     // console.log(process.env.DATABASE_USERNAME);
+//     // console.log(process.env.DATABASE_PASSWORD);
+//     // console.log(process.env.DATABASE_SCHEMA);
+//   });
