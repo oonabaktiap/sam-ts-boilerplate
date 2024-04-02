@@ -4,7 +4,7 @@ import { Base } from '../entity/base.entity';
 
 export const MyDataSource = new DataSource({
     type: 'postgres',
-    host: 'local',
+    host: 'localhost',
     port: 5432,
     username: 'postgres',
     password: 'password',
