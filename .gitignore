@@ -1,3 +1,5 @@
 /base/node_modules
 .aws-sam
 node_modules
+base/coverage
+base/dist
