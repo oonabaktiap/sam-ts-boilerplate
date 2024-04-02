@@ -16,9 +16,9 @@
     "test:watch": "jest --watchAll",
     "test:cov": "jest --coverage",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js --config dist/app/config/migration.configuration.js",
-    "migrate:generate" : "tsc && typeorm migration:generate ./src/migration/mig -d ./dist/src/config/migration.dataSource.config.js",
-    "migrate:up" : "tsc && typeorm migration:run -d ./dist/src/config/migration.dataSource.config.js",
-    "migrate:down" : "tsc && typeorm migration:revert -d ./dist/src/config/migration.dataSource.config.js"
+    "migrate:generate" : "rimraf ./dist && tsc && typeorm migration:generate ./src/migration/mig -d ./dist/src/config/migration.dataSource.config.js",
+    "migrate:up" : "rimraf ./dist && tsc && typeorm migration:run -d ./dist/src/config/migration.dataSource.config.js",
+    "migrate:down" : "rimraf ./dist && tsc && typeorm migration:revert -d ./dist/src/config/migration.dataSource.config.js"
   },
   "dependencies": {
     "@types/pg": "^8.11.4",
@@ -62,7 +62,7 @@
     ],
     "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
-      "\\.(spec|interface|enum|d|type|dto|entity|module|repository|decorator|filter|responses|data|config).ts",
+      "\\.(spec|interface|enum|d|type|dto|module|repository|decorator|filter|responses|data|config|mig|migration).ts",
       "cloud(.|-)config.*.ts",
       "database.*.ts"
     ],

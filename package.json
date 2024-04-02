@@ -10,20 +10,28 @@
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc",
     "test": "npm run compile && npm run unit",
-    "build": "tsc"
+    "test:cov" : "npm --prefix ./base run test:cov",
+    "build": "tsc && npm --prefix ./base run migrate:generate",
+    "migrate:generate" : "npm --prefix ./base run migrate:generate",
+    "migrate:up" : "npm --prefix ./base run migrate:up",
+    "migrate:down" : "npm --prefix ./base run migrate:down"
   },
   "dependencies": {
+    "@types/pg": "^8.11.4",
     "@aws-lambda-powertools/logger": "^2.0.2",
     "@aws-lambda-powertools/parameters": "^2.0.2",
     "@aws-sdk/client-secrets-manager": "^3.529.1",
     "@aws-sdk/client-ssm": "^3.529.1",
+    "pg": "^8.11.3",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1572.0",
     "axios": "^1.6.7",
     "dotenv": "^16.4.5",
     "esbuild": "^0.14.14",
     "handlebars": "^4.7.8",
-    "reflect-metadata": "^0.2.1"
+    "reflect-metadata": "^0.2.1",
+    "typeorm": "^0.3.20"
+
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.92",
