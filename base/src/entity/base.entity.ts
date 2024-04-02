@@ -10,4 +10,8 @@ export class Base {
 
     @Column({ default: null, type: 'int' })
     varNumber: number;
+
+    @Column({ type: 'int', default: null })
+    age: number;
+
 }
