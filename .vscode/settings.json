@@ -2,7 +2,11 @@
   "[typescript]": {
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
+<<<<<<< HEAD
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+=======
+    "editor.defaultFormatter": "vscode.typescript-language-features",
+>>>>>>> 5b37f055079b58c65717e67377d269484bbe7b1d
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }

@@ -2,12 +2,13 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Base } from '../base/src/entity/base.entity';
-import { findBaseById, findCachedBaseById, insertBase, setCachedBaseById, deleteBaseById,  updateBaseById } from 'src/service/base.service';
+import { findBaseById, findCachedBaseById, insertBase, setCachedBaseById, deleteBaseById, updateBaseById, getBaseNoDb } from 'src/service/base.service';
 import { BaseResponse } from 'src/dto/oona.base.response.dto';
-import { set } from 'src/util/redis.util';
 // import { redisClient } from 'src/config/redis.config';
 // import { MyDataSource } from 'src/config/data-source.config';
 // import dotenv from 'dotenv';
+// dotenv.config();
+
 
 /**
  *
@@ -18,12 +19,27 @@ import { set } from 'src/util/redis.util';
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
+export const getBaseNoDbHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    try {
+        console.log('into getBaseNoDB')
+        return await getBaseNoDbFunc(event);
+    } catch (err) {
+        console.log(err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error',
+            }),
+        };
+    }
+}
 
-export const createBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+
+export const createBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         // console.log('incoming event : ',JSON.stringify(event));
-            console.log('into insertBaseFunc')
-            return await insertBaseFunc(event);
+        console.log('into insertBaseFunc')
+        return await insertBaseFunc(event);
         // return {
         //     statusCode: 404,
         //     body: JSON.stringify({
@@ -41,7 +57,7 @@ export const createBaseHandler = async(event : APIGatewayProxyEvent): Promise<AP
     }
 }
 
-export const getBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         console.log('into findBaseByIdFunc')
         return await findBaseByIdFunc(event);
@@ -55,7 +71,7 @@ export const getBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGa
         };
     }
 }
-export const updateBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const updateBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         console.log('into updateBaseByIdFunc')
         return await updateBaseByIdFunc(event);
@@ -69,7 +85,7 @@ export const updateBaseHandler = async(event : APIGatewayProxyEvent): Promise<AP
         };
     }
 }
-export const deleteBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const deleteBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         console.log('into deleteBaseByIdFunc')
         return await deleteBaseByIdFunc(event);
@@ -84,7 +100,7 @@ export const deleteBaseHandler = async(event : APIGatewayProxyEvent): Promise<AP
     }
 }
 
-export const findCachedBaseByIdBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const findCachedBaseByIdBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         console.log('into findCachedBaseByIdFunc')
         return await findCachedBaseByIdFunc(event);
@@ -100,10 +116,9 @@ export const findCachedBaseByIdBaseHandler = async(event : APIGatewayProxyEvent)
 }
 
 
-
-export const setCachedBaseByIdBaseHandler = async(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const setCachedBaseByIdBaseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        console.log('into insertBaseFunc')
+        console.log('into setCachedBaseByIdFunc')
         return await setCachedBaseByIdFunc(event);
     } catch (err) {
         console.log(err);
@@ -123,19 +138,19 @@ export const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatew
         // if (!redisClient.isOpen) await redisClient.connect();
 
         // console.log('incoming event : ',JSON.stringify(event));
-        if (event.resource === '/base/{id}' && event.httpMethod === 'GET' ) { //Read
+        if (event.resource === '/base/{id}' && event.httpMethod === 'GET') { //Read
             console.log('into findBaseByIdFunc')
             return await findBaseByIdFunc(event);
         }
-        if (event.resource === '/base/cached/{id}' && event.httpMethod === 'GET' ) { //Read
+        if (event.resource === '/base/cached/{id}' && event.httpMethod === 'GET') { //Read
             console.log('into findBaseByIdFunc')
             return await findCachedBaseByIdFunc(event);
         }
-        if (event.resource === '/base/create') { //Create
+        if (event.resource === '/base/create' && event.httpMethod === 'POST') { //Create
             console.log('into insertBaseFunc')
             return await insertBaseFunc(event);
         }
-        if (event.resource === '/base/cached/set/{id}') { //Create
+        if (event.resource === '/base/cached/set/{id}' && event.httpMethod === 'GET') {
             console.log('into insertBaseFunc')
             return await setCachedBaseByIdFunc(event);
         }
@@ -146,6 +161,10 @@ export const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatew
         if (event.resource === '/base/{id}' && event.httpMethod === 'DELETE') { //Delete
             console.log('into deleteBaseByIdFunc')
             return await deleteBaseByIdFunc(event);
+        }
+        if (event.resource === '/base/nodb' && event.httpMethod === 'GET') {
+            console.log('into deleteBaseByIdFunc')
+            return await getBaseNoDbFunc(event);
         }
         return {
             statusCode: 404,
@@ -164,13 +183,13 @@ export const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatew
     }
 };
 
-async function findCachedBaseByIdFunc(event : APIGatewayProxyEvent) {
+async function findCachedBaseByIdFunc(event: APIGatewayProxyEvent) {
     if (event && event.pathParameters && event.pathParameters.id) {
         const id: number = +event.pathParameters.id;
         console.log("event path parameters : ", event.pathParameters)
-        console.log("event pathParameter id : ",id)
+        console.log("event pathParameter id : ", id)
         const base = await findCachedBaseById(id);
-        if(base){
+        if (base) {
             return {
                 statusCode: 200,
                 body: JSON.stringify({
@@ -193,13 +212,13 @@ async function findCachedBaseByIdFunc(event : APIGatewayProxyEvent) {
     };
 }
 
-async function setCachedBaseByIdFunc(event : APIGatewayProxyEvent) {
+async function setCachedBaseByIdFunc(event: APIGatewayProxyEvent) {
     if (event && event.pathParameters && event.pathParameters.id) {
         const id: number = +event.pathParameters.id;
         console.log("event path parameters : ", event.pathParameters)
-        console.log("event pathParameter id : ",id)
+        console.log("event pathParameter id : ", id)
         const base = await setCachedBaseById(id);
-        if(base){
+        if (base) {
             return {
                 statusCode: 200,
                 body: JSON.stringify({
@@ -233,7 +252,7 @@ async function insertBaseFunc(event: APIGatewayProxyEvent) {
             baseResponse.code = 0;
             baseResponse.status = 'success';
             baseResponse.message = JSON.stringify(base);
-        }else{
+        } else {
             baseResponse.code = -1;
             baseResponse.status = 'failed';
             baseResponse.message = "failed to create and insert base"
@@ -253,13 +272,13 @@ async function insertBaseFunc(event: APIGatewayProxyEvent) {
     };
 }
 
-async function findBaseByIdFunc(event : APIGatewayProxyEvent) {
+async function findBaseByIdFunc(event: APIGatewayProxyEvent) {
     if (event && event.pathParameters && event.pathParameters.id) {
         const id: number = +event.pathParameters.id;
         console.log("event path parameters : ", event.pathParameters)
-        console.log("event pathParameter id : ",id)
+        console.log("event pathParameter id : ", id)
         const base = await findBaseById(id);
-        if(base){
+        if (base) {
             return {
                 statusCode: 200,
                 body: JSON.stringify({
@@ -285,12 +304,12 @@ async function updateBaseByIdFunc(event: APIGatewayProxyEvent) {
     if (event && event.pathParameters && event.pathParameters.id) {
         const id: number = +event.pathParameters.id;
         console.log("event path parameters : ", event.pathParameters)
-        console.log("event pathParameter id : ",id)
-        if(event.body){
+        console.log("event pathParameter id : ", id)
+        if (event.body) {
             const updateBaseParams = JSON.parse(event.body);
             console.log("event body json object : ", updateBaseParams)
             const base = await updateBaseById(id, updateBaseParams.varString, updateBaseParams.varNumber)
-            if(base){
+            if (base) {
                 return {
                     statusCode: 200,
                     body: JSON.stringify({
@@ -298,13 +317,13 @@ async function updateBaseByIdFunc(event: APIGatewayProxyEvent) {
                     }),
                 };
             }
-        }else{
+        } else {
             return {
                 statusCode: 400,
                 body: JSON.stringify({
                     message: 'body cannot be empty',
                 }),
-            };  
+            };
         }
     }
 
@@ -318,17 +337,33 @@ async function updateBaseByIdFunc(event: APIGatewayProxyEvent) {
 
 async function deleteBaseByIdFunc(event: APIGatewayProxyEvent) {
     if (event && event.pathParameters && event.pathParameters.id) {
-        
+
         const id: number = +event.pathParameters.id;
         console.log("event path parameters : ", event.pathParameters)
-        console.log("event pathParameter id : ",id)
-        const deleteResult  =  await deleteBaseById(id);
-        if(deleteResult){
+        console.log("event pathParameter id : ", id)
+        const deleteResult = await deleteBaseById(id);
+        if (deleteResult) {
             return {
                 statusCode: 200,
                 body: deleteResult,
             };
         }
+    }
+    return {
+        statusCode: 400,
+        body: JSON.stringify({
+            message: 'id cannot be empty',
+        }),
+    };
+}
+
+async function getBaseNoDbFunc(event: APIGatewayProxyEvent) {
+    const noDbResult = await getBaseNoDb();
+    if (noDbResult) {
+        return {
+            statusCode: 200,
+            body: noDbResult,
+        };
     }
     return {
         statusCode: 400,
