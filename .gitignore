@@ -5,3 +5,5 @@
 .aws-sam
 node_modules
 >>>>>>> 5b37f055079b58c65717e67377d269484bbe7b1d
+coverage
+dist
