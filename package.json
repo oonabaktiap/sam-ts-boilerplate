@@ -1,9 +1,9 @@
 {
-  "name": "quick-quote-handler",
+  "name": "sam-ts-boilerplate",
   "version": "1.0.0",
-  "description": "Quick Quote From InsureMO",
+  "description": "Boilerplate project for Oona sam",
   "main": "index.js",
-  "author": "Nandhagopal",
+  "author": "baktiap",
   "license": "MIT",
   "scripts": {
     "unit": "jest",
